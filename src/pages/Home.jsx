@@ -34,7 +34,7 @@ const Home = () => {
                 <div className="hero" style={{
                     height: '80vh',
                     position: 'relative',
-                    backgroundImage: featured.type === 'image' ? `url(http://localhost:3001/media/${featured.path})` : 'none',
+                    backgroundImage: featured.type === 'image' ? `url(/media/${featured.path})` : 'none',
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     display: 'flex',
@@ -42,7 +42,7 @@ const Home = () => {
                 }}>
                     {featured.type === 'video' && (
                         <video
-                            src={`http://localhost:3001/media/${featured.path}`}
+                            src={`/media/${featured.path}`}
                             autoPlay
                             muted
                             loop
@@ -115,9 +115,9 @@ const Row = ({ title, items }) => {
                             transition: 'transform 0.3s'
                         }}>
                             {item.type === 'image' ? (
-                                <img src={`http://localhost:3001/media/${item.path}`} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                <img src={`/media/${item.path}`} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             ) : (
-                                <video src={`http://localhost:3001/media/${item.path}#t=1`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                <video src={`/media/${item.path}#t=1`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             )}
                             <div className="poster-info" style={{
                                 position: 'absolute',
