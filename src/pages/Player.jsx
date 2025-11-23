@@ -67,14 +67,14 @@ const Player = () => {
 
             {item.type === 'video' ? (
                 <video
-                    src={`http://localhost:3001/media/${item.path}`}
+                    src={`/media/${item.path}`}
                     controls
                     autoPlay
                     style={{ width: '100%', height: '100%', maxHeight: '100vh' }}
                 />
             ) : (
                 <img
-                    src={`http://localhost:3001/media/${item.path}`}
+                    src={`/media/${item.path}`}
                     alt={item.name}
                     style={{ maxWidth: '100%', maxHeight: '100vh', objectFit: 'contain' }}
                 />
