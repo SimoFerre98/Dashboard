@@ -33,11 +33,11 @@ const Layout = () => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                background: scrolled ? '#141414' : 'linear-gradient(to bottom, rgba(0,0,0,0.7) 10%, rgba(0,0,0,0))',
+                background: 'var(--bg-color)',
                 transition: 'background-color 0.3s'
             }}>
                 <div className="left" style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-                    <Link to="/" style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#e50914', textDecoration: 'none' }}>
+                    <Link to="/" style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--primary-color)', textDecoration: 'none' }}>
                         MYFLIX
                     </Link>
                     <div className="links" style={{ display: 'flex', gap: '1rem', fontSize: '0.9rem' }}>

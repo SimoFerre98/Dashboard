@@ -30,11 +30,11 @@ const Login = () => {
             justifyContent: 'center',
             alignItems: 'center',
             height: '100vh',
-            backgroundColor: '#141414', // Netflix-like dark background
-            color: '#fff'
+            backgroundColor: 'var(--bg-color)',
+            color: 'var(--text-color)'
         }}>
             <div className="login-box" style={{
-                backgroundColor: 'rgba(0, 0, 0, 0.75)',
+                backgroundColor: 'var(--surface-color)',
                 padding: '60px 68px 40px',
                 borderRadius: '4px',
                 width: '100%',
@@ -65,10 +65,10 @@ const Login = () => {
                             style={{
                                 width: '100%',
                                 padding: '16px 20px',
-                                backgroundColor: '#333',
+                                backgroundColor: 'var(--surface-color)',
                                 border: 'none',
                                 borderRadius: '4px',
-                                color: '#fff',
+                                color: 'var(--text-color)',
                                 fontSize: '16px',
                                 outline: 'none'
                             }}
@@ -84,10 +84,10 @@ const Login = () => {
                             style={{
                                 width: '100%',
                                 padding: '16px 20px',
-                                backgroundColor: '#333',
+                                backgroundColor: 'var(--surface-color)',
                                 border: 'none',
                                 borderRadius: '4px',
-                                color: '#fff',
+                                color: 'var(--text-color)',
                                 fontSize: '16px',
                                 outline: 'none'
                             }}
@@ -99,7 +99,7 @@ const Login = () => {
                         style={{
                             marginTop: '24px',
                             padding: '16px',
-                            backgroundColor: '#e50914', // Netflix red
+                            backgroundColor: 'var(--primary-color)',
                             color: '#fff',
                             border: 'none',
                             borderRadius: '4px',
@@ -109,7 +109,7 @@ const Login = () => {
                             transition: 'background-color 0.2s'
                         }}
                         onMouseOver={(e) => e.target.style.backgroundColor = '#f40612'}
-                        onMouseOut={(e) => e.target.style.backgroundColor = '#e50914'}
+                        onMouseOut={(e) => e.target.style.backgroundColor = 'var(--primary-color)'}
                     >
                         Sign In
                     </button>
