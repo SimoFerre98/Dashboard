@@ -84,15 +84,44 @@ app.get('/api/files', (req, res) => {
 // API: Update metadata
 app.post('/api/files/:id', (req, res) => {
     const { id } = req.params;
-    const { description, tags, title } = req.body;
-    
+    const { description, tags, title, rating, favorite, folder } = req.body;
+
     if (!metadata[id]) metadata[id] = {};
     if (description !== undefined) metadata[id].description = description;
-    if (tags !== undefined) metadata[id].tags = tags;
+    if (tags !== undefined) metadata[id].tags = Array.isArray(tags) ? tags : (typeof tags === 'string' ? tags.split(',').map(t => t.trim()).filter(Boolean) : []);
     if (title !== undefined) metadata[id].title = title;
-    
+    if (rating !== undefined) metadata[id].rating = Number(rating);
+    if (favorite !== undefined) metadata[id].favorite = Boolean(favorite);
+    if (folder !== undefined) metadata[id].folder = folder || null;
+
     saveMetadata();
     res.json({ success: true, data: metadata[id] });
+});
+
+// API: Folders - list all folders created
+app.get('/api/folders', (req, res) => {
+    const set = new Set();
+    for (const key of Object.keys(metadata)) {
+        const entry = metadata[key];
+        if (entry && entry.folder) set.add(entry.folder);
+    }
+    const stored = Array.isArray(metadata._folders) ? metadata._folders : [];
+    const result = Array.from(new Set([...stored, ...set]));
+    res.json({ folders: result });
+});
+
+// API: Create/add a folder name to catalog
+app.post('/api/folders', (req, res) => {
+    const { name } = req.body;
+    if (!name || typeof name !== 'string') {
+        return res.status(400).json({ error: 'Invalid folder name' });
+    }
+    const clean = name.trim();
+    const current = Array.isArray(metadata._folders) ? metadata._folders : [];
+    if (!current.includes(clean)) current.push(clean);
+    metadata._folders = current;
+    saveMetadata();
+    res.json({ success: true, folders: current });
 });
 
 // Serve media files

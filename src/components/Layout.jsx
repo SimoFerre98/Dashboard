@@ -1,11 +1,14 @@
 import React from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { Search, Bell, User, Settings as SettingsIcon } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const Layout = () => {
     const location = useLocation();
     const isScrolled = React.useRef(false);
     const [scrolled, setScrolled] = React.useState(false);
+    const { logout } = useAuth();
+    const navigate = useNavigate();
 
     React.useEffect(() => {
         const handleScroll = () => {
@@ -52,8 +55,12 @@ const Layout = () => {
                     <Link to="/settings">
                         <SettingsIcon size={20} style={{ cursor: 'pointer' }} />
                     </Link>
-                    <div className="profile">
+                    <div className="profile" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                         <User size={20} style={{ cursor: 'pointer' }} />
+                        <button
+                            className="btn btn-secondary"
+                            onClick={() => { logout(); navigate('/login'); }}
+                        >Logout</button>
                     </div>
                 </div>
             </nav>
