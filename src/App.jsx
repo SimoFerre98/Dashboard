@@ -5,6 +5,7 @@ import Home from './pages/Home';
 import Player from './pages/Player';
 import Settings from './pages/Settings';
 import Login from './pages/Login';
+import Chats from './pages/Chats';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -22,6 +23,7 @@ function App() {
           }>
             <Route index element={<Home />} />
             <Route path="settings" element={<Settings />} />
+            <Route path="chats" element={<Chats />} />
           </Route>
 
           <Route path="/watch/:id" element={

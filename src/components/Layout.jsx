@@ -47,6 +47,7 @@ const Layout = () => {
                         <Link to="/">Home</Link>
                         <Link to="/?type=video">Videos</Link>
                         <Link to="/?type=image">Photos</Link>
+                        <Link to="/chats">Chats</Link>
                     </div>
                 </div>
 
