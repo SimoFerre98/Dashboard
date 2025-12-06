@@ -37,8 +37,9 @@ const Chats = () => {
         if (!selectedChat) return;
 
         const currentBookmarks = selectedChat.bookmarks || [];
-        const newBookmarks = currentBookmarks.includes(messageId)
-            ? currentBookmarks.filter(id => id !== messageId)
+        // Ensure we compare numbers/strings consistently
+        const newBookmarks = currentBookmarks.some(id => String(id) === String(messageId))
+            ? currentBookmarks.filter(id => String(id) !== String(messageId))
             : [...currentBookmarks, messageId];
 
         // Optimistic UI update

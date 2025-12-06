@@ -50,46 +50,5 @@ const MessageBubble = ({ message, isMe, isBookmarked, onBookmark, onLinkMedia })
                     minWidth: '100px', // Ensure space for icons
                     paddingTop: '5px',
                     borderTop: '1px solid rgba(255,255,255,0.1)'
-                }}>
-                    <span style={{ fontSize: '0.7em', opacity: 0.7 }}>
-                        {message.time || message.date}
-                    </span>
-
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                        <button
-                            onClick={(e) => { e.stopPropagation(); onBookmark(); }}
-                            title="Bookmark Message"
-                            style={{
-                                background: 'none',
-                                border: 'none',
-                                cursor: 'pointer',
-                                padding: 0,
-                                color: isBookmarked ? '#ffd700' : 'rgba(255,255,255,0.5)',
-                                display: 'flex', alignItems: 'center'
-                            }}
-                        >
-                            <Bookmark size={14} fill={isBookmarked ? 'currentColor' : 'none'} />
-                        </button>
-
-                        <button
-                            onClick={(e) => { e.stopPropagation(); onLinkMedia(); }}
-                            title="Link Media"
-                            style={{
-                                background: 'none',
-                                border: 'none',
-                                cursor: 'pointer',
-                                padding: 0,
-                                color: 'rgba(255,255,255,0.5)',
-                                display: 'flex', alignItems: 'center'
-                            }}
-                        >
-                            <Paperclip size={14} />
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-};
 
 export default MessageBubble;

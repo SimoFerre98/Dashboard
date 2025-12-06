@@ -1,7 +1,10 @@
 import React from 'react';
 import MessageBubble from './MessageBubble';
+import ChatProfile from './ChatProfile';
+import { Info } from 'lucide-react';
 
 const ChatView = ({ chat, content, onBookmark, initialJumpToMessageId }) => {
+    const [showProfile, setShowProfile] = React.useState(false);
     // ... useMemo remains same ...
     const messages = React.useMemo(() => {
         if (!content) return [];
@@ -89,6 +92,10 @@ const ChatView = ({ chat, content, onBookmark, initialJumpToMessageId }) => {
         }
     }, [chat, initialJumpToMessageId]);
 
+    React.useEffect(() => {
+        setVisibleCount(50);
+    }, [searchTerm]);
+
     const isSearching = searchTerm.length > 0;
 
     const filteredMessages = React.useMemo(() => {
@@ -100,15 +107,15 @@ const ChatView = ({ chat, content, onBookmark, initialJumpToMessageId }) => {
         );
     }, [messages, searchTerm]);
 
-    const displayMessages = isSearching ? filteredMessages : messages.slice(0, visibleCount);
+    const displayMessages = isSearching ? filteredMessages.slice(0, visibleCount) : messages.slice(0, visibleCount);
 
     const handleScroll = (e) => {
-        if (isSearching) return;
         const { scrollTop, clientHeight, scrollHeight } = e.target;
         if (scrollHeight - scrollTop - clientHeight < 100) {
             // Reached bottom, load more
-            if (visibleCount < messages.length) {
-                setVisibleCount(prev => Math.min(prev + 50, messages.length));
+            const targetList = isSearching ? filteredMessages : messages;
+            if (visibleCount < targetList.length) {
+                setVisibleCount(prev => Math.min(prev + 50, targetList.length));
             }
         }
     };
@@ -173,89 +180,109 @@ const ChatView = ({ chat, content, onBookmark, initialJumpToMessageId }) => {
                     <h3 style={{ margin: 0 }}>{chat.name}</h3>
                     <span style={{ fontSize: '0.8em', color: 'var(--text-secondary)', padding: '2px 8px', borderRadius: '4px', backgroundColor: 'var(--surface-color)' }}>{chat.type}</span>
                 </div>
-                <input
-                    type="text"
-                    placeholder="Search in chat..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    style={{
-                        background: 'var(--bg-color)',
-                        border: '1px solid var(--surface-color)',
-                        padding: '8px 12px',
-                        borderRadius: '4px',
-                        color: 'var(--text-color)',
-                        minWidth: '200px'
-                    }}
-                />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <input
+                        type="text"
+                        placeholder="Search in chat..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        style={{
+                            background: 'var(--bg-color)',
+                            border: '1px solid var(--surface-color)',
+                            padding: '8px 12px',
+                            borderRadius: '4px',
+                            color: 'var(--text-color)',
+                            minWidth: '200px'
+                        }}
+                    />
+                    <button
+                        onClick={() => setShowProfile(!showProfile)}
+                        style={{ background: 'none', border: 'none', color: 'var(--text-color)', cursor: 'pointer' }}
+                        title="Chat Info"
+                    >
+                        <Info size={20} />
+                    </button>
+                </div>
             </div>
 
-            <div
-                className="messages"
-                onScroll={handleScroll}
-                style={{
-                    flex: 1,
-                    overflowY: 'auto',
-                    padding: '20px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '10px'
-                }}
-            >
-                {displayMessages.length === 0 && (
-                    <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '20px' }}>
-                        <p>No messages found/parsed.</p>
-                        <button
-                            onClick={() => alert(`Type: ${chat.type}\nLength: ${content?.length}\nRaw Start: ${content?.slice(0, 200)}`)}
-                            style={{ marginTop: '10px', padding: '5px 10px', background: '#333', border: 'none', color: '#fff', cursor: 'pointer' }}
-                        >
-                            Show Debug Info
-                        </button>
-                    </div>
-                )}
-
-                {displayMessages.map((msg, i) => {
-                    const prevMsg = i > 0 ? displayMessages[i - 1] : null;
-                    const showHeader = !isSearching && showDateHeader(msg, prevMsg || {});
-
-                    return (
-                        <React.Fragment key={i}>
-                            {showHeader && msg.date && (
-                                <div style={{
-                                    alignSelf: 'center',
-                                    backgroundColor: 'var(--surface-color)',
-                                    padding: '4px 12px',
-                                    borderRadius: '10px',
-                                    fontSize: '0.8em',
-                                    margin: '10px 0',
-                                    color: 'var(--text-secondary)'
-                                }}>
-                                    {msg.date}
-                                </div>
-                            )}
-                            <div
-                                id={`msg-${msg.id}`}
-                                onClick={() => isSearching ? jumpToMessage(msg.id) : null}
-                                style={{
-                                    cursor: isSearching ? 'pointer' : 'default',
-                                    opacity: isSearching ? 0.9 : 1
-                                }}
+            <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+                <div
+                    className="messages"
+                    onScroll={handleScroll}
+                    style={{
+                        flex: 1,
+                        overflowY: 'auto',
+                        padding: '20px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '10px'
+                    }}
+                >
+                    {/* ... messages rendering ... */}
+                    {displayMessages.length === 0 && (
+                        <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '20px' }}>
+                            <p>No messages found/parsed.</p>
+                            <button
+                                onClick={() => alert(`Type: ${chat.type}\nLength: ${content?.length}\nRaw Start: ${content?.slice(0, 200)}`)}
+                                style={{ marginTop: '10px', padding: '5px 10px', background: '#333', border: 'none', color: '#fff', cursor: 'pointer' }}
                             >
-                                <MessageBubble
-                                    message={msg}
-                                    isMe={msg.isMe}
-                                    isBookmarked={msg.isBookmarked}
-                                    onBookmark={() => onBookmark && onBookmark(msg.id)}
-                                    onLinkMedia={() => console.log('Link Media', msg.id)}
-                                />
-                            </div>
-                        </React.Fragment>
-                    );
-                })}
+                                Show Debug Info
+                            </button>
+                        </div>
+                    )}
 
-                {!isSearching && visibleCount < messages.length && (
-                    <div style={{ textAlign: 'center', padding: '10px', color: 'var(--text-secondary)' }}>
-                        Loading more...
-                    </div>
+                    {displayMessages.map((msg, i) => {
+                        const prevMsg = i > 0 ? displayMessages[i - 1] : null;
+                        const showHeader = !isSearching && showDateHeader(msg, prevMsg || {});
+
+                        return (
+                            <React.Fragment key={i}>
+                                {showHeader && msg.date && (
+                                    <div style={{
+                                        alignSelf: 'center',
+                                        backgroundColor: 'var(--surface-color)',
+                                        padding: '4px 12px',
+                                        borderRadius: '10px',
+                                        fontSize: '0.8em',
+                                        margin: '10px 0',
+                                        color: 'var(--text-secondary)'
+                                    }}>
+                                        {msg.date}
+                                    </div>
+                                )}
+                                <div
+                                    id={`msg-${msg.id}`}
+                                    onClick={() => isSearching ? jumpToMessage(msg.id) : null}
+                                    style={{
+                                        cursor: isSearching ? 'pointer' : 'default',
+                                        opacity: isSearching ? 0.9 : 1
+                                    }}
+                                >
+                                    <MessageBubble
+                                        message={msg}
+                                        isMe={msg.isMe}
+                                        isBookmarked={msg.isBookmarked}
+                                        onBookmark={() => onBookmark && onBookmark(msg.id)}
+                                    />
+                                </div>
+                            </React.Fragment>
+                        );
+                    })}
+
+                    {!isSearching && visibleCount < messages.length && (
+                        <div style={{ textAlign: 'center', padding: '10px', color: 'var(--text-secondary)' }}>
+                            Loading more...
+                        </div>
+                    )}
+                </div>
+
+                {showProfile && (
+                    <ChatProfile
+                        chat={chat}
+                        messages={messages}
+                        onClose={() => setShowProfile(false)}
+                        onJumpToMessage={(id) => jumpToMessage(id)}
+                    />
                 )}
             </div>
         </div>
