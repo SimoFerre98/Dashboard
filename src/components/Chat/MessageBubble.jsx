@@ -1,22 +1,21 @@
 import React from 'react';
-import { Bookmark, Paperclip } from 'lucide-react';
+import { Bookmark } from 'lucide-react';
 
-const MessageBubble = ({ message, isMe, isBookmarked, onBookmark, onLinkMedia }) => {
+const MessageBubble = React.memo(({ message, isMe, isBookmarked, onBookmark }) => {
     return (
         <div className="message-bubble" style={{
             display: 'flex',
             flexDirection: 'column',
             alignItems: isMe ? 'flex-end' : 'flex-start',
             maxWidth: '70%',
-            alignSelf: isMe ? 'flex-end' : 'flex-start', // Important for flex container
-            position: 'relative',
-            group: 'bubble'
+            alignSelf: isMe ? 'flex-end' : 'flex-start',
+            position: 'relative'
         }}>
             {/* Sender Name */}
             {!isMe && (
                 <span style={{
                     fontSize: '0.75em',
-                    color: '#e50914', // Netflix Red
+                    color: '#e50914',
                     marginBottom: '4px',
                     marginLeft: '4px',
                     fontWeight: 'bold'
@@ -36,7 +35,7 @@ const MessageBubble = ({ message, isMe, isBookmarked, onBookmark, onLinkMedia })
                 position: 'relative',
                 boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
             }}>
-                <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontSize: '0.95em' }}>
                     {message.text}
                 </div>
 
@@ -44,11 +43,36 @@ const MessageBubble = ({ message, isMe, isBookmarked, onBookmark, onLinkMedia })
                 <div style={{
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'space-between', // Split elements
-                    gap: '10px',
-                    marginTop: '5px',
-                    minWidth: '100px', // Ensure space for icons
-                    paddingTop: '5px',
-                    borderTop: '1px solid rgba(255,255,255,0.1)'
+                    justifyContent: 'space-between',
+                    gap: '15px',
+                    marginTop: '6px',
+                    paddingTop: '4px',
+                }}>
+                    <span style={{ fontSize: '0.7em', opacity: 0.7, minWidth: 'fit-content' }}>
+                        {message.time || message.date}
+                    </span>
+
+                    <button
+                        onClick={(e) => { e.stopPropagation(); onBookmark(); }}
+                        title="Bookmark Message"
+                        style={{
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: 0,
+                            color: isBookmarked ? '#ffd700' : 'rgba(255,255,255,0.4)',
+                            opacity: isBookmarked ? 1 : 0.6,
+                            display: 'flex',
+                            alignItems: 'center',
+                            transition: 'color 0.2s, opacity 0.2s'
+                        }}
+                    >
+                        <Bookmark size={14} fill={isBookmarked ? 'currentColor' : 'none'} />
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+});
 
 export default MessageBubble;
