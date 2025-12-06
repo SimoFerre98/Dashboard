@@ -10,22 +10,19 @@ const Chats = () => {
     React.useEffect(() => {
         if (selectedChat) {
             fetch(`http://localhost:3001/api/chats/${selectedChat.id}/content`)
-                .then(res => res.json())
-                .catch(err => {
-                    // Start of rudimentary error handling for text files which might not parse as JSON if generic endpoint was used incorrectly?
-                    // Actually endpoint discriminates. Text comes as separate response.
-                    // Let's refine fetch logic in effect.
-                    return res.text().then(text => {
-                        // Attempt JSON parse in case backend sent JSON (telegram)
-                        try {
-                            return JSON.parse(text);
-                        } catch {
-                            return text;
-                        }
-                    });
+                .then(res => res.text()) // Read as text first
+                .then(text => {
+                    try {
+                        return JSON.parse(text); // Try to parse as JSON (Telegram)
+                    } catch {
+                        return text; // Fallback to raw text (WhatsApp)
+                    }
                 })
                 .then(data => setChatContent(data))
-                .catch(err => console.error('Failed to load content:', err));
+                .catch(err => {
+                    console.error('Failed to load content:', err);
+                    setChatContent(null);
+                });
         } else {
             setChatContent(null);
         }

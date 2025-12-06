@@ -8,49 +8,67 @@ const ChatView = ({ chat, content, onBookmark, initialJumpToMessageId }) => {
 
         const bookmarks = chat?.bookmarks || [];
 
-        if (chat.type === 'telegram') {
-            const list = content.messages || [];
-            return list.map(m => ({
-                id: m.id,
-                text: typeof m.text === 'string' ? m.text : (Array.isArray(m.text) ? m.text.map(t => typeof t === 'string' ? t : t.text).join('') : ''),
-                sender: m.from,
-                time: new Date(m.date).toLocaleString(),
-                timestamp: m.date_unixtime,
-                isMe: m.from === 'Me' || m.from_id === 'user456',
-                isBookmarked: bookmarks.includes(m.id)
-            }));
-        } else {
-            // WhatsApp TXT parser
-            const lines = content.split('\n');
-            const msgs = [];
-
-            // Regex 1: "dd/mm/yyyy, hh:mm - Sender: Message" (standard iOS/Android)
-            const regex1 = /^(\d{1,2}[\/\.-]\d{1,2}[\/\.-]\d{2,4}),\s+(\d{1,2}:\d{2})\s+-\s+([^:]+):\s+(.+)$/;
-            // Regex 2: "[dd/mm/yyyy, hh:mm:ss] Sender: Message" (bracketed)
-            const regex2 = /^\[(\d{1,2}[\/\.-]\d{1,2}[\/\.-]\d{2,4}),\s+(\d{1,2}:\d{2}:\d{2})\]\s+([^:]+):\s+(.+)$/;
-            // Regex 3: "mm/dd/yy, hh:mm PM - Sender: Message" (US style)
-            const regex3 = /^(\d{1,2}[\/\.-]\d{1,2}[\/\.-]\d{2,4}),\s+(\d{1,2}:\d{2}\s?[AP]M)\s+-\s+([^:]+):\s+(.+)$/;
-
-            lines.forEach((line, index) => {
-                // Try patterns
-                let match = line.match(regex1) || line.match(regex2) || line.match(regex3);
-
-                if (match) {
-                    msgs.push({
-                        id: index,
-                        date: match[1],
-                        time: match[2],
-                        sender: match[3],
-                        text: match[4],
-                        isMe: ["tu", "you", "me", "io"].includes(match[3].toLowerCase()),
-                        isBookmarked: bookmarks.includes(index)
-                    });
-                } else if (msgs.length > 0) {
-                    // Append continuation lines to last message
-                    msgs[msgs.length - 1].text += '\n' + line;
+        try {
+            if (chat.type === 'telegram') {
+                // Telegram expects JSON object
+                if (typeof content !== 'object') {
+                    console.error('Invalid content type for Telegram:', typeof content);
+                    return [];
                 }
-            });
-            return msgs;
+                const list = content.messages || [];
+                return list.map(m => ({
+                    id: m.id,
+                    text: typeof m.text === 'string' ? m.text : (Array.isArray(m.text) ? m.text.map(t => typeof t === 'string' ? t : t.text).join('') : ''),
+                    sender: m.from,
+                    time: m.date ? new Date(m.date).toLocaleString() : 'Unknown',
+                    timestamp: m.date_unixtime,
+                    isMe: m.from === 'Me' || m.from_id === 'user456',
+                    isBookmarked: bookmarks.includes(m.id)
+                }));
+            } else {
+                // WhatsApp expects text content
+                if (typeof content !== 'string') {
+                    console.error('Invalid content type for WhatsApp:', typeof content);
+                    // Fallback: try to stringify if it's an object (maybe error json)
+                    if (typeof content === 'object') return [{ id: 0, text: "Error: Received Object instead of Text. " + JSON.stringify(content), sender: "System", isMe: false }];
+                    return [];
+                }
+
+                console.log('Parsing WhatsApp content length:', content.length);
+                const lines = content.split('\n');
+                const msgs = [];
+
+                // Regex 1: "dd/mm/yyyy, hh:mm - Sender: Message" (standard iOS/Android)
+                const regex1 = /^(\d{1,2}[\/\.-]\d{1,2}[\/\.-]\d{2,4}),\s+(\d{1,2}:\d{2})\s+-\s+([^:]+):\s+(.+)$/;
+                // Regex 2: "[dd/mm/yyyy, hh:mm:ss] Sender: Message" (bracketed)
+                const regex2 = /^\[(\d{1,2}[\/\.-]\d{1,2}[\/\.-]\d{2,4}),\s+(\d{1,2}:\d{2}:\d{2})\]\s+([^:]+):\s+(.+)$/;
+                // Regex 3: "mm/dd/yy, hh:mm PM - Sender: Message" (US style)
+                const regex3 = /^(\d{1,2}[\/\.-]\d{1,2}[\/\.-]\d{2,4}),\s+(\d{1,2}:\d{2}\s?[AP]M)\s+-\s+([^:]+):\s+(.+)$/;
+
+                lines.forEach((line, index) => {
+                    // Try patterns
+                    let match = line.match(regex1) || line.match(regex2) || line.match(regex3);
+
+                    if (match) {
+                        msgs.push({
+                            id: index,
+                            date: match[1],
+                            time: match[2],
+                            sender: match[3],
+                            text: match[4],
+                            isMe: ["tu", "you", "me", "io"].includes(match[3].toLowerCase()),
+                            isBookmarked: bookmarks.includes(index)
+                        });
+                    } else if (msgs.length > 0) {
+                        // Append continuation lines to last message
+                        msgs[msgs.length - 1].text += '\n' + line;
+                    }
+                });
+                return msgs;
+            }
+        } catch (err) {
+            console.error('Error parsing chat:', err);
+            return [{ id: 0, text: "Critical Parsing Error: " + err.message, sender: "System", isMe: false }];
         }
     }, [chat, content]);
 
@@ -185,7 +203,13 @@ const ChatView = ({ chat, content, onBookmark, initialJumpToMessageId }) => {
             >
                 {displayMessages.length === 0 && (
                     <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '20px' }}>
-                        No messages found.
+                        <p>No messages found/parsed.</p>
+                        <button
+                            onClick={() => alert(`Type: ${chat.type}\nLength: ${content?.length}\nRaw Start: ${content?.slice(0, 200)}`)}
+                            style={{ marginTop: '10px', padding: '5px 10px', background: '#333', border: 'none', color: '#fff', cursor: 'pointer' }}
+                        >
+                            Show Debug Info
+                        </button>
                     </div>
                 )}
 
