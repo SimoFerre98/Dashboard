@@ -20,13 +20,21 @@ const ChatView = ({ chat, content, onBookmark, initialJumpToMessageId }) => {
                 isBookmarked: bookmarks.includes(m.id)
             }));
         } else {
-            console.log('Parsing WhatsApp content:', content ? content.slice(0, 100) : 'Empty');
+            // WhatsApp TXT parser
             const lines = content.split('\n');
             const msgs = [];
-            const regex = /^(\d{1,2}\/\d{1,2}\/\d{2,4}),\s+(\d{1,2}:\d{2})\s+-\s+([^:]+):\s+(.+)$/;
+
+            // Regex 1: "dd/mm/yyyy, hh:mm - Sender: Message" (standard iOS/Android)
+            const regex1 = /^(\d{1,2}[\/\.-]\d{1,2}[\/\.-]\d{2,4}),\s+(\d{1,2}:\d{2})\s+-\s+([^:]+):\s+(.+)$/;
+            // Regex 2: "[dd/mm/yyyy, hh:mm:ss] Sender: Message" (bracketed)
+            const regex2 = /^\[(\d{1,2}[\/\.-]\d{1,2}[\/\.-]\d{2,4}),\s+(\d{1,2}:\d{2}:\d{2})\]\s+([^:]+):\s+(.+)$/;
+            // Regex 3: "mm/dd/yy, hh:mm PM - Sender: Message" (US style)
+            const regex3 = /^(\d{1,2}[\/\.-]\d{1,2}[\/\.-]\d{2,4}),\s+(\d{1,2}:\d{2}\s?[AP]M)\s+-\s+([^:]+):\s+(.+)$/;
 
             lines.forEach((line, index) => {
-                const match = line.match(regex);
+                // Try patterns
+                let match = line.match(regex1) || line.match(regex2) || line.match(regex3);
+
                 if (match) {
                     msgs.push({
                         id: index,
@@ -34,10 +42,11 @@ const ChatView = ({ chat, content, onBookmark, initialJumpToMessageId }) => {
                         time: match[2],
                         sender: match[3],
                         text: match[4],
-                        isMe: match[3].toLowerCase() === 'tu' || match[3].toLowerCase() === 'you',
+                        isMe: ["tu", "you", "me", "io"].includes(match[3].toLowerCase()),
                         isBookmarked: bookmarks.includes(index)
                     });
                 } else if (msgs.length > 0) {
+                    // Append continuation lines to last message
                     msgs[msgs.length - 1].text += '\n' + line;
                 }
             });
